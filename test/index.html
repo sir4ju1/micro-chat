@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+  <link rel="stylesheet" href="./milligram.min.css">
+</head>
+
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>Chat</h1>
+    </div>
+    <div id="app">
+      <div class="row">
+        <div class="column">
+          <h4 v-if="isOnline">Online</h4>
+          <h4 v-else>Offline</h4>
+        </div>
+      </div>
+      <div class="row">
+        <div class="column">
+          <ul>
+            <li v-for="msg in msgs">
+              {{msg.message}}
+            </li>
+          </ul>
+        </div>
+      </div>
+      <div class="row">
+        <div class="column column-70">
+          <input type="text" v-model="message">
+        </div>
+        <div class="column">
+          <button @click="sendMsg">Send</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+
+  <script src="./vue.js"></script>
+  <script>
+    var app = new Vue({
+      el: '#app',
+      data: {
+        msgs: [{
+          message: 'Hello World'
+        }],
+        ws: null,
+        message: '',
+        isOnline: false
+      },
+      mounted: function () {
+        var self = this
+        this.ws = ws = new WebSocket('ws://localhost:8080?userid=some-id-sdfs')
+        this.ws.onopen = function (c) {
+          self.isOnline = true
+        }
+        this.ws.onmessage = function (msg) {
+          var data = JSON.parse(msg.data)
+          if (data.uid) {
+            // register uid with user id
+          }
+          self.msgs.push({
+            message: data.msg
+          })
+        }
+        this.ws.onclose = function () {
+          self.isOnline = false
+        }
+      },
+      methods: {
+        sendMsg: function () {
+          console.log
+          this.ws.send(this.message)
+        }
+      }
+    })
+  </script>
+</body>
+
+</html>
