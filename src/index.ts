@@ -23,9 +23,9 @@ wss.on('connection', (ws: any, req: IncomingMessage) => {
       }
     })
   })
-  ws.on('close', (ws) => {
+  ws.on('close', (ws: any) => {
     // notify all other relavent people
-    console.log('connection closed')
+    console.log('connection closed', ws['uid'])
   })
   ws.on('error', (e) => console.log('errored', e.message))
 })

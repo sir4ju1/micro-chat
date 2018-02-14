@@ -64,11 +64,12 @@
         this.ws.onmessage = function (msg) {
           var data = JSON.parse(msg.data)
           if (data.uid) {
-            // register uid with user id
+            console.log(data.uid)
+          } else {
+            self.msgs.push({
+              message: data.msg
+            })
           }
-          self.msgs.push({
-            message: data.msg
-          })
         }
         this.ws.onclose = function () {
           self.isOnline = false
