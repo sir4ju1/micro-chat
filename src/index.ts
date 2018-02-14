@@ -9,7 +9,7 @@ var wss = new Server({
 
 wss.on('connection', (ws: any, req: IncomingMessage) => {
   // GET user credential and store
-  console.log(url.parse(req.url, true).query)
+  var userId = url.parse(req.url, true).query
   // console.log(req.url)
   if(!ws['uid']) {
     const uid = uuid()
@@ -23,12 +23,9 @@ wss.on('connection', (ws: any, req: IncomingMessage) => {
       }
     })
   })
-  ws.on('close', () => {
+  ws.on('close', (ws) => {
     // notify all other relavent people
     console.log('connection closed')
   })
   ws.on('error', (e) => console.log('errored', e.message))
-  
-  
 })
-
