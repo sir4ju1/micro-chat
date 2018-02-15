@@ -27,13 +27,13 @@ wss.on('connection', (ws: any, req: any) => {
   ws.on('message', (ms) => {
     wss.clients.forEach(function each(client) {
       if (client !== ws && client.readyState === OPEN) {
-        client.send(JSON.stringify({ msg: ms }));
+        client.send(JSON.stringify({ msg: ms, from: ws.uid }));
       }
     })
   })
-  ws.on('close', (ws: any) => {
+  ws.on('close', () => {
     // notify all other relavent people
-    console.log('connection closed', ws['uid'])
+    console.log('connection closed', ws.uid)
   })
   ws.on('error', (e) => console.log('errored', e.message))
 })

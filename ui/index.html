@@ -39,6 +39,7 @@
         <div class="column">
           <ul>
             <li v-for="msg in msgs">
+              <b>{{msg.from}}</b>
               {{msg.message}}
             </li>
           </ul>
@@ -58,13 +59,12 @@
 
 
   <script src="./vue.js"></script>
+  <script src="./random.js"></script>
   <script>
     var app = new Vue({
       el: '#app',
       data: {
-        msgs: [{
-          message: 'Hello World'
-        }],
+        msgs: [],
         ws: null,
         message: '',
         isOnline: false
@@ -82,8 +82,8 @@
         },
         connect: function () {
           var self = this
-
-          this.ws = ws = new WebSocket('ws://localhost:8080?userid=some-id-sdfs')
+          var name = generateName()
+          this.ws = ws = new WebSocket(`ws://localhost:8080?userid=${name}`)
           this.ws.onopen = function (c) {
             self.isOnline = true
           }
@@ -93,7 +93,8 @@
               console.log(data.uid)
             } else {
               self.msgs.push({
-                message: data.msg
+                message: data.msg,
+                from: data.from
               })
             }
           }
