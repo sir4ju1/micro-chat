@@ -7,6 +7,14 @@
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <title>Document</title>
   <link rel="stylesheet" href="./milligram.min.css">
+  <style>
+    .button-small {
+      font-size: .8rem;
+      height: 2.8rem;
+      line-height: 2.8rem;
+      padding: 0 1.5rem;
+    }
+  </style>
 </head>
 
 <body>
@@ -17,8 +25,14 @@
     <div id="app">
       <div class="row">
         <div class="column">
-          <h4 v-if="isOnline">Online</h4>
-          <h4 v-else>Offline</h4>
+          <span v-if="isOnline">
+            Online
+            <button class="button button-small button-outline" @click="disconnect">Disconnect</button>
+          </span>
+          <span v-else>
+            Offline
+            <button class="button-small button-outline" @click="connect">Connect</button>
+          </span>
         </div>
       </div>
       <div class="row">
@@ -56,29 +70,36 @@
         isOnline: false
       },
       mounted: function () {
-        var self = this
-        this.ws = ws = new WebSocket('ws://localhost:8080?userid=some-id-sdfs')
-        this.ws.onopen = function (c) {
-          self.isOnline = true
-        }
-        this.ws.onmessage = function (msg) {
-          var data = JSON.parse(msg.data)
-          if (data.uid) {
-            console.log(data.uid)
-          } else {
-            self.msgs.push({
-              message: data.msg
-            })
-          }
-        }
-        this.ws.onclose = function () {
-          self.isOnline = false
-        }
+        this.connect()
       },
       methods: {
         sendMsg: function () {
           console.log
           this.ws.send(this.message)
+        },
+        disconnect: function () {
+          this.ws.close()
+        },
+        connect: function () {
+          var self = this
+
+          this.ws = ws = new WebSocket('ws://localhost:8080?userid=some-id-sdfs')
+          this.ws.onopen = function (c) {
+            self.isOnline = true
+          }
+          this.ws.onmessage = function (msg) {
+            var data = JSON.parse(msg.data)
+            if (data.uid) {
+              console.log(data.uid)
+            } else {
+              self.msgs.push({
+                message: data.msg
+              })
+            }
+          }
+          this.ws.onclose = function () {
+            self.isOnline = false
+          }
         }
       }
     })

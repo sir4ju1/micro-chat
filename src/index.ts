@@ -1,20 +1,28 @@
-import { OPEN,  Server } from 'ws'
+import { OPEN, Server } from 'ws'
+import * as express from 'express'
 import chalk from 'chalk'
-import * as uuid from 'uuid'
 import * as url from 'url'
-import { IncomingMessage } from 'http';
-var wss = new Server({
-  port: 8080
-}, () => console.log(chalk.bgGreen.gray(' OK '), chalk.blue('Server Started!')))
+import * as http from 'http'
 
-wss.on('connection', (ws: any, req: IncomingMessage) => {
+const app = express()
+
+const server = http.createServer(app)
+var wss = new Server({
+  server
+})
+
+app.get('/users', function (_, res) {
+  const userCount = wss.clients.size
+  res.send({ user: userCount })
+})
+
+
+wss.on('connection', (ws: any, req: any) => {
   // GET user credential and store
-  var userId = url.parse(req.url, true).query
-  // console.log(req.url)
-  if(!ws['uid']) {
-    const uid = uuid()
-    ws['uid'] = uid
-    ws.send(JSON.stringify({ uid }))
+  var query = url.parse(req.url, true).query
+  var userId = query.userid
+  if (!ws['uid']) {
+    ws['uid'] = userId
   }
   ws.on('message', (ms) => {
     wss.clients.forEach(function each(client) {
@@ -29,3 +37,5 @@ wss.on('connection', (ws: any, req: IncomingMessage) => {
   })
   ws.on('error', (e) => console.log('errored', e.message))
 })
+
+server.listen(8080, () => console.log(chalk.bgGreen.gray(' OK '), chalk.blue('Server Started!')))
