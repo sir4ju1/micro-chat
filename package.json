@@ -13,7 +13,6 @@
   "license": "ISC",
   "dependencies": {
     "chalk": "^2.3.1",
-    "express": "^4.16.2",
     "gun": "^0.9.93",
     "ws": "^4.0.0"
   },

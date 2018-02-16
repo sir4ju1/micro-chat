@@ -14,6 +14,10 @@
       line-height: 2.8rem;
       padding: 0 1.5rem;
     }
+
+    #chat-box {
+      height: 450px;
+    }
   </style>
 </head>
 
@@ -24,6 +28,7 @@
     </div>
     <div id="app">
       <div class="row">
+
         <div class="column">
           <span v-if="isOnline">
             Online
@@ -36,23 +41,29 @@
         </div>
       </div>
       <div class="row">
-        <div class="column">
-          <ul>
-            <li v-for="msg in msgs">
-              <b>{{msg.from}}</b>
-              {{msg.message}}
-            </li>
-          </ul>
+        <div class="column column-20">
+
+        </div>
+        <div class="column column-80">
+          <div id="chat-box">
+            <ul>
+              <li v-for="msg in msgs">
+                <b>{{msg.from}}</b>
+                {{msg.message}}
+              </li>
+            </ul>
+          </div>
+          <div class="row">
+            <div class="column column-80">
+              <input type="text" v-model="message">
+            </div>
+            <div class="column">
+              <button @click="sendMsg">Send</button>
+            </div>
+          </div>
         </div>
       </div>
-      <div class="row">
-        <div class="column column-70">
-          <input type="text" v-model="message">
-        </div>
-        <div class="column">
-          <button @click="sendMsg">Send</button>
-        </div>
-      </div>
+
     </div>
 
   </div>
@@ -63,11 +74,13 @@
   <script>
     var app = new Vue({
       el: '#app',
-      data: {
-        msgs: [],
-        ws: null,
-        message: '',
-        isOnline: false
+      data: function () {
+        return {
+          msgs: [],
+          ws: null,
+          message: '',
+          isOnline: false
+        }
       },
       mounted: function () {
         this.connect()
