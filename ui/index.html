@@ -17,6 +17,30 @@
 
     #chat-box {
       height: 450px;
+      border: 1px solid #ccc;
+      border-radius: 2px;
+      margin-bottom: 12px;
+    }
+
+    #online-box {
+      padding: 5px;
+      height: 500px;
+      border: 1px solid #ccc;
+      border-radius: 2px;
+      overflow-y: scroll;
+    }
+
+    #online-box ul {
+      list-style: none;
+    }
+
+    #online-box ul li {
+      font-size: 1.2rem;
+    }
+
+    #online-box ul li:hover {
+      font-size: 1.5rem;
+      cursor: pointer;
     }
   </style>
 </head>
@@ -28,7 +52,9 @@
     </div>
     <div id="app">
       <div class="row">
-
+        <div class="column column-30">
+          <h3>{{myName}}</h3>
+        </div>
         <div class="column">
           <span v-if="isOnline">
             Online
@@ -42,7 +68,13 @@
       </div>
       <div class="row">
         <div class="column column-20">
-
+          <div id="online-box">
+            <ul>
+              <li v-for="friend in friends" @click="setChat(friend)">
+                {{friend}}
+              </li>
+            </ul>
+          </div>
         </div>
         <div class="column column-80">
           <div id="chat-box">
@@ -76,9 +108,13 @@
       el: '#app',
       data: function () {
         return {
+          myName: '',
+          chatTo: '',
+          allMsgs: new Map(),
           msgs: [],
           ws: null,
           message: '',
+          friends: [],
           isOnline: false
         }
       },
@@ -87,8 +123,12 @@
       },
       methods: {
         sendMsg: function () {
-          console.log
-          this.ws.send(this.message)
+          this.ws.send(JSON.stringify({
+            msg: this.message,
+            type: 1,
+            to: this.chatTo
+          }))
+          this.message = ''
         },
         disconnect: function () {
           this.ws.close()
@@ -96,24 +136,57 @@
         connect: function () {
           var self = this
           var name = generateName()
+          this.myName = name
           this.ws = ws = new WebSocket(`ws://localhost:8080?userid=${name}`)
           this.ws.onopen = function (c) {
             self.isOnline = true
+            self.ws.send(JSON.stringify({
+              type: 2
+            }))
           }
           this.ws.onmessage = function (msg) {
             var data = JSON.parse(msg.data)
-            if (data.uid) {
-              console.log(data.uid)
-            } else {
-              self.msgs.push({
-                message: data.msg,
-                from: data.from
-              })
+            switch (data.type) {
+              case 0:
+                if (data.isOnline) {
+                  self.friends.push(data.from)
+                } else {
+                  self.friends = self.friends.filter(f => {
+                    if (f !== data.from) return f
+                  })
+                }
+                break
+              case 1:
+                console.log(data.msg)
+                if (self.allMsgs.has(data.from)) {
+                  var msgs = self.allMsgs.get(data.from)
+                  msgs.push({
+                    message: data.msg,
+                    from: data.from
+                  })
+                } else {
+                  var msgs = [{
+                    message: data.msg,
+                    from: data.from
+                  }]
+                  self.allMsgs.set(data.from, msgs)
+
+                }
+                break;
+              case 2:
+                self.friends = data.friends
+                break
+              default:
+                break;
             }
           }
           this.ws.onclose = function () {
             self.isOnline = false
           }
+        },
+        setChat: function (friend) {
+          this.msgs = this.allMsgs.get(friend)
+          this.chatTo = friend
         }
       }
     })
