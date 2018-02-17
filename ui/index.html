@@ -16,6 +16,7 @@
     }
 
     #chat-box {
+      padding: 5px;
       height: 450px;
       border: 1px solid #ccc;
       border-radius: 2px;
@@ -128,6 +129,11 @@
             type: 1,
             to: this.chatTo
           }))
+          this.addChat(
+            this.chatTo,
+            this.message,
+            this.myName
+          )
           this.message = ''
         },
         disconnect: function () {
@@ -157,21 +163,7 @@
                 }
                 break
               case 1:
-                console.log(data.msg)
-                if (self.allMsgs.has(data.from)) {
-                  var msgs = self.allMsgs.get(data.from)
-                  msgs.push({
-                    message: data.msg,
-                    from: data.from
-                  })
-                } else {
-                  var msgs = [{
-                    message: data.msg,
-                    from: data.from
-                  }]
-                  self.allMsgs.set(data.from, msgs)
-
-                }
+                self.addChat(data.from, data.msg, data.from)
                 break;
               case 2:
                 self.friends = data.friends
@@ -182,6 +174,23 @@
           }
           this.ws.onclose = function () {
             self.isOnline = false
+          }
+        },
+        addChat: function (chatId, msg, from) {
+          var self = this
+          if (self.allMsgs.has(chatId)) {
+            var msgs = self.allMsgs.get(chatId)
+            msgs.push({
+              message: msg,
+              from: from
+            })
+          } else {
+            var msgs = [{
+              message: msg,
+              from: from
+            }]
+            self.allMsgs.set(chatId, msgs)
+
           }
         },
         setChat: function (friend) {
